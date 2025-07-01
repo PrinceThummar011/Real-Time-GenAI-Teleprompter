@@ -1,7 +1,3 @@
-Here’s a polished `README.md` file for your **Real-Time GenAI Teleprompter** project:
-
----
-
 # 🎤 Real-Time GenAI Teleprompter
 
 A real-time AI assistant for sales conversations.
