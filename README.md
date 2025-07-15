@@ -148,4 +148,4 @@ app.py              # Main Streamlit application
 
 ---
 
-**Made with ❤️ for sales professionals**
+**Thank you for your interest and support!**
