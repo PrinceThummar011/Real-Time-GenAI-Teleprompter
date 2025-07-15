@@ -123,13 +123,6 @@ app.py              # Main Streamlit application
    - Increase LLM update interval
    - Use faster internet connection
 
-## 📊 Performance Metrics
-
-- **Transcription Speed**: ~200ms latency
-- **LLM Response Time**: ~500ms
-- **Memory Usage**: ~50MB
-- **CPU Usage**: ~15% (during recording)
-
 ## 🤝 Contributing
 
 1. Fork the repository
