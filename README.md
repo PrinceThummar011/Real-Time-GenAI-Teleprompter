@@ -139,6 +139,25 @@ app.py              # Main Streamlit application
 - **PyAudio** for audio processing
 - **OpenAI** for Whisper transcription
 
+## ☁️ Streamlit Cloud Deployment
+
+### Live Demo
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-name.streamlit.app/)
+
+### Cloud vs Local Differences
+- **Local**: Real-time microphone recording with PyAudio
+- **Cloud**: Web-based audio recorder + file upload (PyAudio not available)
+
+### Deploy Your Own
+1. Fork this repository
+2. Connect to [Streamlit Cloud](https://streamlit.io/cloud)
+3. Add secrets in your Streamlit dashboard:
+   ```
+   GROQ_API_KEY = "your_key_here"
+   OPENAI_API_KEY = "your_key_here"  # optional
+   ```
+4. Deploy!
+
 ---
 
 **Thank you for your interest and support!**

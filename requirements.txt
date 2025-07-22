@@ -1,5 +1,7 @@
 streamlit
 groq
 openai
-pyaudio
 python-dotenv
+# pyaudio  # Removed for cloud compatibility
+streamlit-audio-recorder
+streamlit-webrtc

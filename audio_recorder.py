@@ -1,26 +1,61 @@
 import streamlit as st
-import queue
 import io
 import wave
-import pyaudio
 from datetime import datetime
+from audio_recorder_streamlit import audio_recorder
+
+# Try to import pyaudio for local development
+try:
+    import pyaudio
+    import queue
+    PYAUDIO_AVAILABLE = True
+except ImportError:
+    PYAUDIO_AVAILABLE = False
+    st.info("Running in cloud mode - using file upload instead of live recording")
 
 # Configuration
 CHUNK_SIZE = 1024
-FORMAT = pyaudio.paInt16
+FORMAT = pyaudio.paInt16 if PYAUDIO_AVAILABLE else None
 CHANNELS = 1
 RATE = 16000
-RECORD_SECONDS_CHUNK = 2  # Send audio chunks every 2 seconds
+RECORD_SECONDS_CHUNK = 2
 
 class AudioRecorder:
     def __init__(self):
-        self.audio = pyaudio.PyAudio()
-        self.stream = None
+        self.is_cloud_mode = not PYAUDIO_AVAILABLE
+        if not self.is_cloud_mode:
+            self.audio = pyaudio.PyAudio()
+            self.stream = None
+            self.audio_queue = queue.Queue()
         self.is_recording = False
-        self.audio_queue = queue.Queue()
+        self.recorded_audio = None
         
     def start_recording(self):
-        """Start recording audio from microphone"""
+        """Start recording audio - cloud or local mode"""
+        if self.is_cloud_mode:
+            return self._start_cloud_recording()
+        else:
+            return self._start_local_recording()
+    
+    def _start_cloud_recording(self):
+        """Cloud mode: Use streamlit audio recorder"""
+        st.info("🎤 Click the record button below to start recording")
+        audio_bytes = audio_recorder(
+            text="Click to record",
+            recording_color="#e8b62c",
+            neutral_color="#6aa36f",
+            icon_name="microphone",
+            icon_size="2x",
+        )
+        
+        if audio_bytes:
+            self.recorded_audio = audio_bytes
+            self.is_recording = True
+            return True
+        return False
+    
+    def _start_local_recording(self):
+        """Local mode: Use PyAudio"""
         try:
             self.stream = self.audio.open(
                 format=FORMAT,
@@ -40,18 +75,34 @@ class AudioRecorder:
     def stop_recording(self):
         """Stop recording audio"""
         self.is_recording = False
-        if self.stream:
+        if not self.is_cloud_mode and self.stream:
             self.stream.stop_stream()
             self.stream.close()
         
     def _audio_callback(self, in_data, frame_count, time_info, status):
-        """Callback for audio stream"""
+        """Callback for audio stream (local mode only)"""
         if self.is_recording:
             self.audio_queue.put(in_data)
         return (in_data, pyaudio.paContinue)
     
     def get_audio_chunk(self, duration_seconds=RECORD_SECONDS_CHUNK):
-        """Get audio chunk of specified duration"""
+        """Get audio chunk - cloud or local mode"""
+        if self.is_cloud_mode:
+            return self._get_cloud_audio_chunk()
+        else:
+            return self._get_local_audio_chunk(duration_seconds)
+    
+    def _get_cloud_audio_chunk(self):
+        """Get audio chunk in cloud mode"""
+        if self.recorded_audio:
+            # Return the recorded audio data
+            audio_data = self.recorded_audio
+            self.recorded_audio = None  # Clear after use
+            return audio_data
+        return None
+    
+    def _get_local_audio_chunk(self, duration_seconds):
+        """Get audio chunk in local mode"""
         frames = []
         frames_needed = int(RATE / CHUNK_SIZE * duration_seconds)
         
@@ -78,4 +129,5 @@ class AudioRecorder:
     def cleanup(self):
         """Cleanup audio resources"""
         self.stop_recording()
-        self.audio.terminate()
+        if not self.is_cloud_mode:
+            self.audio.terminate()

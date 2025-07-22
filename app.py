@@ -330,17 +330,22 @@ def export_session_data():
     )
 
 def main():
-    st.set_page_config(
-        page_title="GenAI Sales Teleprompter",
-        page_icon="🎙️",
-        layout="wide"
-    )
+    st.title("🎙️ Real-Time GenAI Sales Teleprompter")
     
-    initialize_session_state()
-    
-    # Header
-    st.title("🎙️ Real-Time GenAI Sales Teleprompter (Powered by Groq)")
-    st.markdown("*Your AI wingman for sales calls - Lightning fast with Groq!*")
+    # Check if running in cloud mode
+    audio_recorder = AudioRecorder()
+    if audio_recorder.is_cloud_mode:
+        st.info("🌐 Running in Cloud Mode - Upload audio files or use the web recorder")
+        
+        # Add file upload option
+        uploaded_file = st.file_uploader(
+            "Or upload an audio file", 
+            type=['wav', 'mp3', 'm4a', 'flac']
+        )
+        
+        if uploaded_file is not None:
+            audio_data = uploaded_file.read()
+            # Process uploaded audio...
     
     # API Configuration Section
     with st.sidebar:
